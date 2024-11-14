@@ -1,51 +1,41 @@
-capacity = int(input('Enter the capacity of memory:'))
-pages = list(input('Enter the reference string:'))
-pages = [int(item) for item in pages]
-faults = 0
-hits = 0
+# Get user inputs
+capacity = int(input("Enter the capacity of memory: "))
+pages = [int(x) for x in input("Enter the reference string: ")]
+faults = hits = 0
 memory = []
+
+# Function to find the optimal page to replace
 
 
 def findOptimalPage(startIndex):
-    maxDistance = 0
-    optimalPage: int
-    distance = 0
+    maxDist, optimalPage = 0, None
     for page in memory:
-        found = False
-        for j in range(startIndex+1, len(pages)):
-            if pages[j] == page:
-                found = True
-                break
-            distance += 1
-        if found:
-            if distance > maxDistance:
-                maxDistance = distance
-                optimalPage = page
-        else:
-            optimalPage = page
-            return optimalPage
-        distance = 0
+        if page not in pages[startIndex + 1:]:
+            return page
+        dist = pages[startIndex + 1:].index(page)
+        if dist > maxDist:
+            maxDist, optimalPage = dist, page
     return optimalPage
 
 
-print(f'Page\tMemory\t\ttStatus')
-for i in range(len(pages)):
-    found = False
-    if pages[i] in memory:
-        found = True
+# Print header
+print("Page\tMemory\t\tStatus")
+
+# Process each page
+for i, page in enumerate(pages):
+    if page in memory:  # Page hit
         hits += 1
-    else:
+        status = 'H'
+    else:  # Page fault
         if len(memory) == capacity:
-            optimalPage = findOptimalPage(i)
-            memory.remove(optimalPage)
-        memory.append(pages[i])
+            memory.remove(findOptimalPage(i))
+        memory.append(page)
         faults += 1
+        status = 'F'
 
-    print(f'{pages[i]}\t{list(memory)}', end='\t\t')
-    if found:
-        print('H')
-    else:
-        print('F')
+    # Print current state
+    print(f"{page}\t{memory}\t\t{status}")
 
-print(f'Hit Ratio = {hits}/{len(pages)} = {hits/len(pages)}')
-print(f'Fault Ratio = {faults}/{len(pages)} = {faults/len(pages)}')
+# Final statistics
+print(f"\nHit Ratio = {hits}/{len(pages)} = {hits / len(pages):.2f}")
+print(f"Fault Ratio = {faults}/{len(pages)} = {faults / len(pages):.2f}")
